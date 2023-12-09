@@ -1,0 +1,54 @@
+
+#include <SoftwareSerial.h>
+SoftwareSerial BTserial(2,3); // BT RX (Arduino TX) at pin 2, BT TX (Arduino RX) at pin 3
+ 
+const int bottomButton = 6;
+const int leftButton = 9;
+const int topButton = 7;
+const int rightButton = 8;
+const int joyButton = 4; // Joystick button
+const int joyX = 0; // Analog pin 0
+const int joyY = 1; // Analog pin 1
+byte x = 0;
+byte y = 0;
+ 
+void setup() 
+{
+    BTserial.begin(9600); // set baud rate for bluetooth module
+    Serial.begin(9600);
+    pinMode(bottomButton, INPUT_PULLUP);
+    pinMode(topButton, INPUT_PULLUP);
+    pinMode(leftButton, INPUT_PULLUP);
+    pinMode(rightButton, INPUT_PULLUP);
+    pinMode(joyButton, INPUT);
+}
+ 
+void loop()
+{
+  if (digitalRead(leftButton)==LOW){
+   BTserial.print("L");
+  } else if (digitalRead(rightButton)==LOW){
+    BTserial.print("R");
+  } else if (digitalRead(topButton)==LOW){
+    BTserial.print("T");
+  } else if (digitalRead(bottomButton)==LOW){
+    BTserial.print("B");
+  } else if (digitalRead(joyButton)==HIGH){
+    BTserial.print("J");
+  } else {
+    x = 255 - round(analogRead(joyY)/4);
+    y = 255 - round(analogRead(joyX)/4);
+    BTserial.print("X");
+    BTserial.write(x);
+   //BTserial.print("Y");
+   //delay(100);
+    BTserial.write(y);
+    //delay(100);
+  //  BTserial.print("X");
+    //BTserial.print(x);
+    //BTserial.print(y);
+    Serial.print(x, BIN);
+    Serial.print("\n");
+  }
+  delay(100);
+}
