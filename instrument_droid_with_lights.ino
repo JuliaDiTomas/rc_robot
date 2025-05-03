@@ -18,6 +18,17 @@ ezBuzzer buzzer(10);
 // Declare our NeoPixel strip object:
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
+short ss_melody[] = { // Guitar riff from "Sunshine of your Love"
+  NOTE_D5, NOTE_D5, NOTE_C5, NOTE_D5, NOTE_A4, NOTE_GS4, NOTE_G4, NOTE_D4, NOTE_F4, NOTE_D4
+};
+
+byte ss_rhythm[] = {
+    4, 4, 4, 2, 2, 2, 2, 4, 2, 2
+
+  //8, 8, 8, 4, 4, 4, 4, 8, 4, 4
+};
+
+int ss_size = sizeof(ss_rhythm) / sizeof(byte);
 
 Adafruit_ADS1115 ads;
 Adafruit_MCP4725 dac;
@@ -37,7 +48,7 @@ float V_VRM_on_v; // the value of the VRM voltage
 float V_VRM_off_v; // the value of the VRM voltage
 float I_sense_on_A; // the current through the sense resistor
 float I_sense_off_A; // the current through the sense resistor
-float I_max_A = 0.25; // max current to set for
+float I_max_A = .25; // max current to set for
 int npts = 20; //number of points to measure
 float I_step_A = I_max_A / npts; //step current change
 float I_load_A; // the measured current load
@@ -73,6 +84,8 @@ ads.setDataRate(RATE_ADS1115_860SPS);// sets the ADS1115 for higher speed
 }
 
 void loop() {
+if (buzzer.getState() != BUZZER_IDLE){
+    buzzer.loop(); } else {
    for(int i=0; i<strip.numPixels(); i++) { // Set all LEDs to red
       strip.setPixelColor(i, strip.Color(255,   0,   0));         //  Set pixel's color (in RAM)
     }
@@ -92,16 +105,7 @@ R_thevenin = (V_VRM_thevenin_v - V_VRM_loaded_v) / I_load_A;
 if (V_VRM_loaded_v < 0.75 * V_VRM_thevenin_v) {
   Serial.println("Stopping ramping");
   i = npts; //stops the ramping
-  }
-Serial.print(i);
-Serial.print(", ");
-Serial.print(I_load_A * 1e3, 3);
-Serial.print(", ");
-Serial.print(V_VRM_thevenin_v, 4);
-Serial.print(", ");
-Serial.print(V_VRM_loaded_v, 4);
-Serial.print(", ");
-Serial.println(R_thevenin, 4);
+  } else {
 
  if (i+1 > npts/5){
     strip.setPixelColor(0, strip.Color(0,   255,   0)); 
@@ -119,10 +123,22 @@ Serial.println(R_thevenin, 4);
     strip.setPixelColor(4, strip.Color(0,   255,   0)); 
   }
   strip.show();
+  }
+Serial.print(i);
+Serial.print(", ");
+Serial.print(I_load_A * 1e3, 3);
+Serial.print(", ");
+Serial.print(V_VRM_thevenin_v, 4);
+Serial.print(", ");
+Serial.print(V_VRM_loaded_v, 4);
+Serial.print(", ");
+Serial.println(R_thevenin, 4);
+
 
 }
 Serial.println("done");
-delay(3000);
+  buzzer.playMelody(ss_melody, ss_rhythm, ss_size); 
+}
 }
 
 void func_meas_off(){
